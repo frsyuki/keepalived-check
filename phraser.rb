@@ -25,7 +25,26 @@
 module Phraser
 
 
+class ScanError  < StandardError
+	def initialize(args)
+		@src = args[0]
+		@pos = args[1]
+		super(args[2])
+	end
+	attr_reader :src, :pos
+end
+
+class ParseError < StandardError
+	def initialize(args)
+		@tokens = args[0]
+		super(args[1])
+	end
+	attr_reader :tokens
+end
+
+
 class Scanner
+
 	class Token
 		def initialize(name, expr)
 			@name = name
@@ -63,7 +82,7 @@ class Scanner
 					break nil
 				end
 			}
-			raise "error '#{s.peek(10)}'" if err
+			raise ScanError, [src, s.pos, "error '#{s.peek(10)}'"] if err
 		end
 	
 		result
@@ -72,8 +91,6 @@ end
 
 
 class Parser
-	class ParseError < StandardError; end
-
 	def initialize(&block)
 		@block = block
 		@action = Proc.new {|x,e| x }
@@ -152,7 +169,7 @@ class Parser
 				r = parse(i,e)
 			rescue ParseError
 			end
-			raise ParseError, "not error: #{i.inpsect}" if r
+			raise ParseError, [i, "not error: #{i.inpsect}"] if r
 			[nil, i]
 		}
 	end
@@ -170,7 +187,7 @@ class Parser
 		def token(t, match = nil)
 			parser {|i,e|
 				unless i.first && i.first.token == t.to_sym && (match.nil? || i.first =~ match)
-					raise ParseError, "token error: #{i.inspect}"
+					raise ParseError, [i, "token error: #{i.inspect}"]
 				end
 				[i.first, i[1..-1]]
 			}
@@ -179,7 +196,7 @@ class Parser
 		def any
 			parser {|i,e|
 				unless i.length > 0
-					raise ParseError, "any error: #{i.inspect}"
+					raise ParseError, [i, "any error: #{i.inspect}"]
 				end
 				[i.first, i[1..-1]]
 			}
@@ -188,7 +205,7 @@ class Parser
 		def eof
 			parser {|i,e|
 				unless i.empty?
-					raise ParseError, "EOF error: #{i.inspect}"
+					raise ParseError, [i, "EOF error: #{i.inspect}"]
 				end
 				[nil, i]
 			}
