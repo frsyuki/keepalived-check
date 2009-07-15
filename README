@@ -26,6 +26,15 @@ keepalived.conf parser and checker
   keepalived-check /etc/keepalived.conf
 
 
+*Limitation
+
+  keepalived-check does NOT cover all options. It may report the valid
+	keepalived.conf file as invalid or the invalid file as valid.
+
+  Feel free to fork keepalived-conf tree at github and send pull requests :D
+	http://github.com/frsyuki/keepalived-check/tree
+
+
 *License
   Copyright (c) 2009 FURUHASHI Sadayuki
 
