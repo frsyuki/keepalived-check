@@ -28,9 +28,9 @@ include Phraser
 
 s = Phraser::Scanner.new
 
-s.token :comment,   /\![^\r\n]*[\r\n]+/
-s.token :blank,     /(:?[ \t]+)|(:?[ \t]+[\r\n]+)/
-s.token :line_end,  /[ \t]*[\r\n][ \r\n\t]*/
+s.token :blank,     /[ \t]+/
+s.token :comment,   /[\!\#][^\r\n]*$/
+s.token :line_end,  /[\r\n]/
 s.token :qstr,      /\'[^\']*\'/
 s.token :qqstr,     /\"[^\"]*\"/
 s.token '{'
@@ -41,7 +41,7 @@ Scanner = s
 
 
 Rblock = rule do
-	( token('{') ^ token(:line_end) ^ Rbody[:body] ^ token('}')
+	( token('{') ^ token(:line_end).+ ^ Rbody[:body] ^ token('}')
 	).action {|x,e| e[:body] }
 end
 
@@ -50,7 +50,7 @@ Rconf_value = rule do
 end
 
 Rconf = rule do
-	( Rconf_value.+[:values] ^ Rblock.opt[:block] ^ token(:line_end)
+	( Rconf_value.+[:values] ^ Rblock.opt[:block] ^ token(:line_end).+
 	).action {|x,e| Conf.new(e[:values], e[:block]) }
 end
 
@@ -60,8 +60,8 @@ Rbody = rule do
 end
 
 Rule = rule do
-	( Rbody ^ eof
-	).action {|x,e| Conf.new(['root'], x[0]).extend(Root) }
+	( token(:line_end).* ^ Rbody[:body] ^ eof
+	).action {|x,e| Conf.new(['root'], e[:body]).extend(Root) }
 end
 
 
@@ -103,6 +103,7 @@ Accept = Proc.new do
 		accept :delay_loop, Aint
 		accept :lb_algo, Regexp.union(%w[rr wrr lc wlc lblc sh dh])
 		accept :lb_kind, Regexp.union(%w[NAT DR TUN])
+		accept :nat_mask, Aip
 		accept :persistence_timeout, Aint
 		accept :persistence_granularity, Amask
 		accept :protocol, Regexp.union(%w[TCP])
