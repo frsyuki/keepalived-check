@@ -99,19 +99,19 @@ Accept = Proc.new do
 
 	block :static_ipaddress do
 		try_accept Aip, :dev, Astr
-		try_accept Aip, :dev, Astr, :scope, Regexp.union(%w[site link host nowhere global_defs])
+		try_accept Aip, :dev, Astr, :scope, Regexp.union(*%w[site link host nowhere global_defs])
 	end
 
 	virtual_server_block = Proc.new do
 		accept :delay_loop, Aint
-		accept :lb_algo,    Regexp.union(%w[rr wrr lc wlc lblc sh dh])
-		accept :lvs_sched,  Regexp.union(%w[rr wrr lc wlc lblc sh dh])
-		accept :lb_kind,    Regexp.union(%w[NAT DR TUN])
-		accept :lvs_method, Regexp.union(%w[NAT DR TUN])
+		accept :lb_algo,    Regexp.union(*%w[rr wrr lc wlc lblc sh dh])
+		accept :lvs_sched,  Regexp.union(*%w[rr wrr lc wlc lblc sh dh])
+		accept :lb_kind,    Regexp.union(*%w[NAT DR TUN])
+		accept :lvs_method, Regexp.union(*%w[NAT DR TUN])
 		accept :nat_mask, Aip
 		accept :persistence_timeout, Aint
 		accept :persistence_granularity, Amask
-		accept :protocol, Regexp.union(%w[TCP])
+		accept :protocol, Regexp.union(*%w[TCP])
 		accept :ha_suspend
 		accept :virtualhost, Astr
 		accept :alpha
@@ -198,7 +198,7 @@ Accept = Proc.new do
 	end
 
 	block :vrrp_instance, Astr do
-		accept :state, Regexp.union(%w[MASTER BACKUP])
+		accept :state, Regexp.union(*%w[MASTER BACKUP])
 		accept :interface, Astr
 		accept :lvs_sync_daemon_interface, Astr
 		block :track_interface do
@@ -216,7 +216,7 @@ Accept = Proc.new do
 		accept :priority, Aint_0_255
 		accept :advert_int, Aint
 		block :authentication do
-			accept :auth_type, Regexp.union(%w[PASS AH])
+			accept :auth_type, Regexp.union(*%w[PASS AH])
 			accept :auth_pass, Aany
 		end
 		block :virtual_ipaddress do
@@ -233,7 +233,7 @@ Accept = Proc.new do
 			try_accept Aipmask, :via, Aip, :dev, Astr
 			try_accept Aipmask, :via, Aip
 			try_accept Aipmask, :dev, Astr
-			try_accept Aipmask, :dev, Astr, :scope, Regexp.union(%w[site link host nowhere global_defs])
+			try_accept Aipmask, :dev, Astr, :scope, Regexp.union(*%w[site link host nowhere global_defs])
 		end
 		accept :nopreempt
 		accept :preempt_delay
