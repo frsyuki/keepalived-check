@@ -79,7 +79,7 @@ Aip     = /[0-9\.]+/
 Aiprange= /[0-9\.\-]+/
 Aipmask = /[0-9\.\/]+/
 Aport   = /[0-9]+/
-Amail   = /[a-zA-Z_\.\@]+/
+Amail   = /[a-zA-Z0-9_\.\@]+/
 Amask   = Aip
 
 Aint_254_254 = Proc.new {|v| Aint.match(v).to_s == v && (-254..254).include?(v.to_i) }
@@ -104,8 +104,10 @@ Accept = Proc.new do
 
 	virtual_server_block = Proc.new do
 		accept :delay_loop, Aint
-		accept :lb_algo, Regexp.union(%w[rr wrr lc wlc lblc sh dh])
-		accept :lb_kind, Regexp.union(%w[NAT DR TUN])
+		accept :lb_algo,    Regexp.union(%w[rr wrr lc wlc lblc sh dh])
+		accept :lvs_sched,  Regexp.union(%w[rr wrr lc wlc lblc sh dh])
+		accept :lb_kind,    Regexp.union(%w[NAT DR TUN])
+		accept :lvs_method, Regexp.union(%w[NAT DR TUN])
 		accept :nat_mask, Aip
 		accept :persistence_timeout, Aint
 		accept :persistence_granularity, Amask
