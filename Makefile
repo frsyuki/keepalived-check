@@ -7,7 +7,15 @@ keepalived-check: keepalived-check.rb phraser.rb
 	if [ -f $@ ]; then mv $@ $@.old; fi
 	mv $@.tmp $@
 
-.PHONY: clean
+.PHONY: check clean
+
+check: keepalived-check
+	for f in test/*.conf.*; do \
+		echo $$f; \
+		ruby keepalived-check.rb $$f; \
+		echo ""; \
+	done
+
 clean:
 	rm -rf keepalived-check
 
