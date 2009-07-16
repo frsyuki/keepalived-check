@@ -72,10 +72,12 @@ end
 
 
 Aany    = /.+/
-Astr    = /[a-zA-Z0-9_]+/
-Aint    = /[0-9]+/
+Astr    = /[a-zA-Z0-9_\.]+/
+Aint    = /\-?[0-9]+/
 Ahost   = /[a-zA-Z0-9\.]+/
 Aip     = /[0-9\.]+/
+Aiprange= /[0-9\.\-]+/
+Aipmask = /[0-9\.\/]+/
 Aport   = /[0-9]+/
 Amail   = /[a-zA-Z_\.\@]+/
 Amask   = Aip
@@ -92,6 +94,7 @@ Accept = Proc.new do
 		accept :smtp_server, Ahost
 		accept :smtp_connect_timeout, Aint
 		accept :router_id, Astr
+		accept :lvs_id, Astr
 	end
 
 	block :static_ipaddress do
@@ -113,10 +116,11 @@ Accept = Proc.new do
 		accept :omega
 		accept :quality, Aint
 		accept :hysteresis, Aint
+		accept :quorum, Aint
 		accept :quorum_up, Aany
 		accept :quorum_down, Aany
 		accept :sorry_server, Aip, Aport
-		block :real_server, Aip, Aport do
+		real_server_block = Proc.new do
 			accept :weight, Aint
 			accept :inhibit_on_failure
 			accept :notify_master, Aany
@@ -161,14 +165,40 @@ Accept = Proc.new do
 				accept :misc_dynamic
 			end
 		end
+		try_block :real_server, Aip, Aport, &real_server_block
+		try_block :real_server, Aip, &real_server_block
 	end
 	try_block :virtual_server, Ahost, Aport, &virtual_server_block
 	try_block :virtual_server, :fwmark, Aint, &virtual_server_block
 	try_block :virtual_server, :group, Astr, &virtual_server_block
 
+	block :virtual_server_group, Aany do
+		accept Aiprange, Aport
+		accept :fwmark, Aint
+	end
+
+	block :vrrp_sync_group, Astr do
+		block :group do
+			accept Astr
+		end
+		accept :notify_master, Aany
+		accept :notify_backup, Aany
+		accept :notify_fault, Aany
+		accept :notify_stop, Aany
+		accept :notify, Aany
+		accept Astr
+	end
+
+	block :vrrp_script, Astr do
+		accept :script, Aany
+		accept :interval, Aint
+		accept :weight, Aint
+	end
+
 	block :vrrp_instance, Astr do
 		accept :state, Regexp.union(%w[MASTER BACKUP])
 		accept :interface, Astr
+		accept :lvs_sync_daemon_interface, Astr
 		block :track_interface do
 			try_accept Astr
 			try_accept Astr, :weight, Aint_254_254
@@ -188,14 +218,20 @@ Accept = Proc.new do
 			accept :auth_pass, Aany
 		end
 		block :virtual_ipaddress do
-			try_accept Aip
+			try_accept Aipmask
+			try_accept Aipmask, :dev, Astr
+			try_accept Aipmask, :label, Aany
 		end
 		block :virtual_ipaddress_excluded do
-			try_accept Aip
+			try_accept Aipmask
 		end
 		block :virtual_routes do
-			accept :src, Aip
-			accept :blackhole, Aip
+			try_accept :src, Aip, Aipmask, :via, Aip, :dev, Astr
+			try_accept :blackhole, Aipmask
+			try_accept Aipmask, :via, Aip, :dev, Astr
+			try_accept Aipmask, :via, Aip
+			try_accept Aipmask, :dev, Astr
+			try_accept Aipmask, :dev, Astr, :scope, Regexp.union(%w[site link host nowhere global_defs])
 		end
 		accept :nopreempt
 		accept :preempt_delay
@@ -206,6 +242,13 @@ Accept = Proc.new do
 		accept :notify_stop, Aany
 		accept :notify, Aany
 		accept :smtp_alert
+	end
+
+	block :static_route do
+		try_accept :src, Aip, Aipmask, :via, Aip, :dev, Astr
+		try_accept Aipmask, :via, Aip, :dev, Astr
+		try_accept Aipmask, :via, Aip
+		try_accept Aipmask, :dev, Astr
 	end
 end
 
