@@ -12,7 +12,7 @@ keepalived-check: keepalived-check.rb phraser.rb
 check: keepalived-check
 	for f in test/*.conf.*; do \
 		echo $$f; \
-		ruby keepalived-check.rb $$f; \
+		ruby keepalived-check.rb -e $$f; \
 		echo ""; \
 	done
 

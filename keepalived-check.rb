@@ -86,6 +86,12 @@ Amask   = Aip
 Aint_254_254 = Proc.new {|v| Aint.match(v).to_s == v && (-254..254).include?(v.to_i) }
 Aint_0_255   = Proc.new {|v| Aint.match(v).to_s == v && (0..255).include?(v.to_i) }
 
+
+opt = {
+	:verbose => false,
+	:extend  => false,
+}
+
 Accept = Proc.new do
 	block :global_defs do
 		block :notification_email do
@@ -168,9 +174,7 @@ Accept = Proc.new do
 				accept :misc_dynamic
 			end
 
-			if true # FIXME enable by opt[:extend] option?
-				# support extended syntax
-
+			if opt[:extend]
 				# http://dsas.blog.klab.org/archives/51030424.html
 				block :DNS_CHECK do
 					accept :port,    Aport
@@ -195,7 +199,7 @@ Accept = Proc.new do
 					accept :retry,              Aint
 					accept :delay_before_retry, Aint
 				end
-			end
+			end  # opt[:extend]
 
 		end
 		try_block :real_server, Aip, Aport, &real_server_block
@@ -445,12 +449,9 @@ if $0 == __FILE__
 
 require 'optparse'
 
-opt = {
-	:verbose => false
-}
-
 op = OptionParser.new
-op.on('-v', '--verbose')  {|b| opt[:verbose] = b }
+op.on('-v', '--verbose', 'verbose mode') {|b| opt[:verbose] = b }
+op.on('-e', '--extend',  'enable some extended syntaxes') {|b| opt[:extend]  = b }
 op.banner += " <keepalived.conf>"
 
 op.parse!(ARGV)
