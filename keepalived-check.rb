@@ -166,6 +166,36 @@ Accept = Proc.new do
 				accept :misc_timeout, Aint
 				accept :misc_dynamic
 			end
+
+			if true # FIXME enable by opt[:extend] option?
+				# support extended syntax
+
+				# http://dsas.blog.klab.org/archives/51030424.html
+				block :DNS_CHECK do
+					accept :port,    Aport
+					accept :timeout, Aint
+					accept :retry,   Aint
+					accept :type,    Astr
+					accept :name,    Astr
+				end
+
+				block :SSL_HELLO do
+					accept :connect_port,       Aport
+					accept :connect_timeout,    Aint
+					accept :retry,              Aint
+					accept :delay_before_retry, Aint
+					accept :common_name,        Astr
+				end
+
+				block :FTP_CHECK do
+					accept :connect_port,       Aport
+					accept :bind_to,            Aip
+					accept :connect_timeout,    Aint
+					accept :retry,              Aint
+					accept :delay_before_retry, Aint
+				end
+			end
+
 		end
 		try_block :real_server, Aip, Aport, &real_server_block
 		try_block :real_server, Aip, &real_server_block
