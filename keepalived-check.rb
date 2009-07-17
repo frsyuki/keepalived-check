@@ -73,6 +73,7 @@ end
 
 Aany    = /.+/
 Astr    = /[a-zA-Z0-9_\.]+/
+Aif     = /[a-zA-Z0-9_\.:]+/
 Aint    = /\-?[0-9]+/
 Ahost   = /[a-zA-Z0-9\.]+/
 Aip     = /[0-9\.]+/
@@ -98,8 +99,8 @@ Accept = Proc.new do
 	end
 
 	block :static_ipaddress do
-		try_accept Aip, :dev, Astr
-		try_accept Aip, :dev, Astr, :scope, Regexp.union(*%w[site link host nowhere global_defs])
+		try_accept Aip, :dev, Aif
+		try_accept Aip, :dev, Aif, :scope, Regexp.union(*%w[site link host nowhere global_defs])
 	end
 
 	virtual_server_block = Proc.new do
@@ -251,19 +252,19 @@ Accept = Proc.new do
 		end
 		block :virtual_ipaddress do
 			try_accept Aipmask
-			try_accept Aipmask, :dev, Astr
+			try_accept Aipmask, :dev, Aif
 			try_accept Aipmask, :label, Aany
 		end
 		block :virtual_ipaddress_excluded do
 			try_accept Aipmask
 		end
 		block :virtual_routes do
-			try_accept :src, Aip, Aipmask, :via, Aip, :dev, Astr
+			try_accept :src, Aip, Aipmask, :via, Aip, :dev, Aif
 			try_accept :blackhole, Aipmask
-			try_accept Aipmask, :via, Aip, :dev, Astr
+			try_accept Aipmask, :via, Aip, :dev, Aif
 			try_accept Aipmask, :via, Aip
-			try_accept Aipmask, :dev, Astr
-			try_accept Aipmask, :dev, Astr, :scope, Regexp.union(*%w[site link host nowhere global_defs])
+			try_accept Aipmask, :dev, Aif
+			try_accept Aipmask, :dev, Aif, :scope, Regexp.union(*%w[site link host nowhere global_defs])
 		end
 		accept :nopreempt
 		accept :preempt_delay
@@ -277,10 +278,10 @@ Accept = Proc.new do
 	end
 
 	block :static_route do
-		try_accept :src, Aip, Aipmask, :via, Aip, :dev, Astr
-		try_accept Aipmask, :via, Aip, :dev, Astr
+		try_accept :src, Aip, Aipmask, :via, Aip, :dev, Aif
+		try_accept Aipmask, :via, Aip, :dev, Aif
 		try_accept Aipmask, :via, Aip
-		try_accept Aipmask, :dev, Astr
+		try_accept Aipmask, :dev, Aif
 	end
 end
 
