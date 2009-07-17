@@ -111,7 +111,7 @@ Accept = Proc.new do
 		accept :nat_mask, Aip
 		accept :persistence_timeout, Aint
 		accept :persistence_granularity, Amask
-		accept :protocol, Regexp.union(*%w[TCP])
+		accept :protocol, Regexp.union(*%w[TCP UDP])
 		accept :ha_suspend
 		accept :virtualhost, Astr
 		accept :alpha
