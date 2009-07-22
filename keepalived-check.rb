@@ -100,7 +100,7 @@ Accept = Proc.new do
 		accept :notification_email_from, Amail
 		accept :smtp_server, Ahost
 		accept :smtp_connect_timeout, Aint
-		accept :router_id, Astr
+		accept_one :router_id, Astr
 		accept :lvs_id, Astr
 	end
 
@@ -412,6 +412,26 @@ class Body < Array
 				true
 			end
 		}
+	end
+
+	def accept_n(n, *args)
+		x = 0
+		reject! {|conf|
+			if check(conf.key, args.first)  # keyがマッチ
+				unless conf.values.length == args.length && match(conf.values, args)
+					raise "\"#{conf.values.join(' ')}\" requires #{args.inspect}"
+				end
+				if x >= n
+					raise "\"#{conf.values.join(' ')}\" must be #{n} lines or less"
+				end
+				x += 1
+				true
+			end
+		}
+	end
+
+	def accept_one(*args)
+		accept_n(1, *args)
 	end
 
 	def try_accept(*args)
