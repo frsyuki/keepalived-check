@@ -82,6 +82,7 @@ Aipmask = /[0-9\.\/]+/
 Aport   = /[0-9]+/
 Amail   = /[a-zA-Z0-9_\-\+\.\@]+/
 Amask   = Aip
+Adigest = /[a-fA-F0-9]{32}/
 
 Aint_254_254 = Proc.new {|v| Aint.match(v).to_s == v && (-254..254).include?(v.to_i) }
 Aint_0_255   = Proc.new {|v| Aint.match(v).to_s == v && (0..255).include?(v.to_i) }
@@ -138,7 +139,7 @@ Accept = Proc.new do
 			http_block = Proc.new do
 				block :url do
 					accept :path, Aany
-					accept :digest, Astr
+					accept :digest, Adigest
 					accept :status_code, Aint
 				end
 				accept :connect_port, Aint
