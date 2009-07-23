@@ -247,7 +247,7 @@ Accept = Proc.new do
 		accept :dont_track_primary
 		accept :mcast_src_ip, Aip
 		accept :garp_master_delay, Aint
-		accept :virtual_router_id, Aint_0_255
+		accept_one :virtual_router_id, Aint_0_255
 		accept :priority, Aint_0_255
 		accept :advert_int, Aint
 		block :authentication do
