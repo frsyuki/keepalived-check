@@ -75,12 +75,12 @@ Aany    = /.+/
 Astr    = /[a-zA-Z0-9_\.]+/
 Aif     = /[a-zA-Z0-9_\.:]+/
 Aint    = /\-?[0-9]+/
-Ahost   = /[a-zA-Z0-9\.]+/
+Ahost   = /[a-zA-Z0-9_\-\.]+/
 Aip     = /[0-9\.]+/
 Aiprange= /[0-9\.\-]+/
 Aipmask = /[0-9\.\/]+/
 Aport   = /[0-9]+/
-Amail   = /[a-zA-Z0-9_\.\@]+/
+Amail   = /[a-zA-Z0-9_\-\+\.\@]+/
 Amask   = Aip
 
 Aint_254_254 = Proc.new {|v| Aint.match(v).to_s == v && (-254..254).include?(v.to_i) }
