@@ -72,8 +72,9 @@ end
 
 
 Aany    = /.+/
+Apath   = Aany
 Astr    = /[a-zA-Z0-9_\.]+/
-Aif     = /[a-zA-Z0-9_\.:]+/
+Anetif  = /[a-zA-Z0-9_\.:]+/
 Aint    = /\-?[0-9]+/
 Ahost   = /[a-zA-Z0-9_\-\.]+/
 Aip     = /[0-9\.]+/
@@ -102,12 +103,12 @@ Accept = Proc.new do
 		accept :smtp_server, Ahost
 		accept :smtp_connect_timeout, Aint
 		accept_one :router_id, Astr
-		accept :lvs_id, Astr
+		accept_one :lvs_id, Astr
 	end
 
 	block :static_ipaddress do
-		try_accept Aip, :dev, Aif
-		try_accept Aip, :dev, Aif, :scope, Regexp.union(*%w[site link host nowhere global_defs])
+		try_accept Aip, :dev, Anetif
+		try_accept Aip, :dev, Anetif, :scope, Regexp.union(*%w[site link host nowhere global_defs])
 	end
 
 	virtual_server_block = Proc.new do
@@ -127,18 +128,18 @@ Accept = Proc.new do
 		accept :quality, Aint
 		accept :hysteresis, Aint
 		accept :quorum, Aint
-		accept :quorum_up, Aany
-		accept :quorum_down, Aany
+		accept :quorum_up, Apath
+		accept :quorum_down, Apath
 		accept :sorry_server, Aip, Aport
 		real_server_block = Proc.new do
 			accept :weight, Aint
 			accept :inhibit_on_failure
-			accept :notify_master, Aany
-			accept :notify_down, Aany
+			accept :notify_master, Apath
+			accept :notify_down, Apath
 
 			http_block = Proc.new do
 				block :url do
-					accept :path, Aany
+					accept :path, Apath
 					accept :digest, Adigest
 					accept :status_code, Aint
 				end
@@ -170,7 +171,7 @@ Accept = Proc.new do
 			end
 
 			block :MISC_CHECK do
-				accept :misc_path, Aany
+				accept :misc_path, Apath
 				accept :misc_timeout, Aint
 				accept :misc_dynamic
 			end
@@ -219,31 +220,31 @@ Accept = Proc.new do
 		block :group do
 			accept Astr
 		end
-		accept :notify_master, Aany
-		accept :notify_backup, Aany
-		accept :notify_fault, Aany
-		accept :notify_stop, Aany
-		accept :notify, Aany
+		accept :notify_master, Apath
+		accept :notify_backup, Apath
+		accept :notify_fault, Apath
+		accept :notify_stop, Apath
+		accept :notify, Apath
 		accept Astr
 	end
 
 	block :vrrp_script, Astr do
-		accept :script, Aany
+		accept :script, Apath
 		accept :interval, Aint
 		accept :weight, Aint
 	end
 
 	block :vrrp_instance, Astr do
 		accept :state, Regexp.union(*%w[MASTER BACKUP])
-		accept :interface, Astr
-		accept :lvs_sync_daemon_interface, Astr
+		accept :interface, Anetif
+		accept :lvs_sync_daemon_interface, Anetif
 		block :track_interface do
-			try_accept Astr
-			try_accept Astr, :weight, Aint_254_254
+			try_accept Anetif
+			try_accept Anetif, :weight, Aint_254_254
 		end
 		block :track_script do
-			try_accept Aany
-			try_accept Aany, :weight, Aint_254_254
+			try_accept Apath
+			try_accept Apath, :weight, Aint_254_254
 		end
 		accept :dont_track_primary
 		accept :mcast_src_ip, Aip
@@ -257,36 +258,36 @@ Accept = Proc.new do
 		end
 		block :virtual_ipaddress do
 			try_accept Aipmask
-			try_accept Aipmask, :dev, Aif
+			try_accept Aipmask, :dev, Anetif
 			try_accept Aipmask, :label, Aany
 		end
 		block :virtual_ipaddress_excluded do
 			try_accept Aipmask
 		end
 		block :virtual_routes do
-			try_accept :src, Aip, Aipmask, :via, Aip, :dev, Aif
+			try_accept :src, Aip, Aipmask, :via, Aip, :dev, Anetif
 			try_accept :blackhole, Aipmask
-			try_accept Aipmask, :via, Aip, :dev, Aif
+			try_accept Aipmask, :via, Aip, :dev, Anetif
 			try_accept Aipmask, :via, Aip
-			try_accept Aipmask, :dev, Aif
-			try_accept Aipmask, :dev, Aif, :scope, Regexp.union(*%w[site link host nowhere global_defs])
+			try_accept Aipmask, :dev, Anetif
+			try_accept Aipmask, :dev, Anetif, :scope, Regexp.union(*%w[site link host nowhere global_defs])
 		end
 		accept :nopreempt
 		accept :preempt_delay
 		accept :debug
-		accept :notify_master, Aany
-		accept :notify_backup, Aany
-		accept :notify_fault, Aany
-		accept :notify_stop, Aany
-		accept :notify, Aany
+		accept :notify_master, Apath
+		accept :notify_backup, Apath
+		accept :notify_fault, Apath
+		accept :notify_stop, Apath
+		accept :notify, Apath
 		accept :smtp_alert
 	end
 
 	block :static_route do
-		try_accept :src, Aip, Aipmask, :via, Aip, :dev, Aif
-		try_accept Aipmask, :via, Aip, :dev, Aif
+		try_accept :src, Aip, Aipmask, :via, Aip, :dev, Anetif
+		try_accept Aipmask, :via, Aip, :dev, Anetif
 		try_accept Aipmask, :via, Aip
-		try_accept Aipmask, :dev, Aif
+		try_accept Aipmask, :dev, Anetif
 	end
 end
 
